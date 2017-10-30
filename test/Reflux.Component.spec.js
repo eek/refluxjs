@@ -26,7 +26,7 @@ describe('Creating ES6 style React classes', function()
 {
 	it('should allow defining of React with Reflux.defineReact without error', function()
 	{
-		Reflux.defineReact(React, Reflux);
+		Reflux.defineReact(React);
 		
 		return true;
 	});
@@ -207,6 +207,34 @@ describe('Creating ES6 style React classes', function()
 		var result = ReactDOMServer.renderToStaticMarkup( React.createElement(MyComponent, null) );
 		
 		assert.equal( result, '<p>foo:bar</p>' );
+	});
+	
+	it('should extend third party components with Reflux.Component.extend()', function()
+	{
+		var OtherComponent = (function (_super) {
+			__extends(Component, _super);
+			function Component(props) {
+				_super.call(this, props);
+				this.foo = 'other class bar and ';
+			}
+			return Component;
+		}(React.Component));
+		
+		var MyComponent = (function (_super) {
+			__extends(Component, _super);
+			function Component(props) {
+				_super.call(this, props);
+				this.store = Reflux.createStore({state:{foo:'baz'}});
+			}
+			Component.prototype.render = function () {
+				return React.createElement("p", null, this.foo+this.state.foo);
+			};
+			return Component;
+		}(Reflux.Component.extend(OtherComponent)));
+		
+		var result = ReactDOMServer.renderToStaticMarkup( React.createElement(MyComponent, null) );
+		
+		assert.equal( result, '<p>other class bar and baz</p>' );
 	});
 
 });

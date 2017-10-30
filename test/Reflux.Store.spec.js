@@ -1,35 +1,21 @@
 
 var chai = require('chai'),
     assert = chai.assert,
-    Reflux = require('../src'),
-    Q = require('q');
+    Reflux = require('../src');
 
 chai.use(require('chai-as-promised'));
 	
 var React = require('react');
 var ReactDOMServer = require('react-dom/server');
 
-Reflux.defineReact(React, Reflux);
-
-
-function __extends (d, b) {
-    for (var p in b) {
-		if (b.hasOwnProperty(p)) {
-			d[p] = b[p];
-		}
-	}
-    function __() {
-		this.constructor = d;
-	}
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
+Reflux.defineReact(React);
 
 
 describe('Creating ES6 style stores', function()
 {
 	it('should allow defining of React with Reflux.defineReact without error', function()
 	{
-		Reflux.defineReact(React, Reflux);
+		Reflux.defineReact(React);
 		
 		return true;
 	});
@@ -37,7 +23,7 @@ describe('Creating ES6 style stores', function()
 	it('should construct with a default empty state object', function()
 	{
 		var MyStore = (function (_super) {
-			__extends(Store, _super);
+			Reflux.utils.inherits(Store, _super);
 			function Store() {
 				_super.call(this);
 			}
@@ -54,7 +40,7 @@ describe('Creating ES6 style stores', function()
 		var Actions = Reflux.createActions(['up', 'down', 'finish']);
 		
 		var MyStore = (function (_super) {
-			__extends(Store, _super);
+			Reflux.utils.inherits(Store, _super);
 			function Store() {
 				_super.call(this);
 				this.listenTo(Actions.up, function(){ this.state.count++; });
@@ -72,13 +58,7 @@ describe('Creating ES6 style stores', function()
 		Actions.down();
 		Actions.finish();
 		
-		var promise = Q.Promise(function(resolve) {
-			store.listenTo(Actions.finish, function() {
-				resolve(store.state.count);
-			});
-		});
-		
-		return assert.eventually.equal( promise, 2 );
+		return assert.equal(store.state.count, 2);
 	});
 	
 	it('should accept listenables with \'action\' and \'onAction\' callbacks', function()
@@ -86,7 +66,7 @@ describe('Creating ES6 style stores', function()
 		var Actions = Reflux.createActions(['up', 'down', 'finish']);
 		
 		var MyStore = (function (_super) {
-			__extends(Store, _super);
+			Reflux.utils.inherits(Store, _super);
 			function Store() {
 				_super.call(this);
 				this.listenables = Actions;
@@ -105,13 +85,7 @@ describe('Creating ES6 style stores', function()
 		Actions.down();
 		Actions.finish();
 		
-		var promise = Q.Promise(function(resolve) {
-			store.listenTo(Actions.finish, function() {
-				resolve(store.state.count);
-			});
-		});
-		
-		return assert.eventually.equal( promise, 2 );
+		return assert.equal(store.state.count, 2);
 	});
 	
 	it('should be able to modify state with setState', function()
@@ -119,7 +93,7 @@ describe('Creating ES6 style stores', function()
 		var Actions = Reflux.createActions(['up', 'down', 'finish']);
 		
 		var MyStore = (function (_super) {
-			__extends(Store, _super);
+			Reflux.utils.inherits(Store, _super);
 			function Store() {
 				_super.call(this);
 				this.listenables = Actions;
@@ -138,13 +112,7 @@ describe('Creating ES6 style stores', function()
 		Actions.down();
 		Actions.finish();
 		
-		var promise = Q.Promise(function(resolve) {
-			store.listenTo(Actions.finish, function() {
-				resolve(store.state.count);
-			});
-		});
-		
-		return assert.eventually.equal( promise, 2 );
+		return assert.equal(store.state.count, 2);
 	});
 	
 	it('should accept actions with arguments', function()
@@ -152,7 +120,7 @@ describe('Creating ES6 style stores', function()
 		var Actions = Reflux.createActions(['up', 'down', 'finish']);
 		
 		var MyStore = (function (_super) {
-			__extends(Store, _super);
+			Reflux.utils.inherits(Store, _super);
 			function Store() {
 				_super.call(this);
 				this.listenables = Actions;
@@ -171,19 +139,13 @@ describe('Creating ES6 style stores', function()
 		Actions.down(2);
 		Actions.finish();
 		
-		var promise = Q.Promise(function(resolve) {
-			store.listenTo(Actions.finish, function() {
-				resolve(store.state.count);
-			});
-		});
-		
-		return assert.eventually.equal( promise, 1 );
+		return assert.equal(store.state.count, 1);
 	});
 	
 	it('should mix state in with a Reflux.Component instance', function()
 	{
 		var MyStore = (function (_super) {
-			__extends(Store, _super);
+			Reflux.utils.inherits(Store, _super);
 			function Store() {
 				_super.call(this);
 				this.state = {foo:'bar'};
@@ -192,7 +154,7 @@ describe('Creating ES6 style stores', function()
 		}(Reflux.Store));
 		
 		var MyComponent = (function (_super) {
-			__extends(Component, _super);
+			Reflux.utils.inherits(Component, _super);
 			function Component(props) {
 				_super.call(this, props);
 				this.state = {};
@@ -212,7 +174,7 @@ describe('Creating ES6 style stores', function()
 	it('should use singleton instance when applied to multiple components', function()
 	{
 		var MyStore = (function (_super) {
-			__extends(Store, _super);
+			Reflux.utils.inherits(Store, _super);
 			function Store() {
 				_super.call(this);
 				this.state = {foo:'bar'};
@@ -224,7 +186,7 @@ describe('Creating ES6 style stores', function()
 		MyStore.instanceCount = 0;
 		
 		var MyComponent1 = (function (_super) {
-			__extends(Component1, _super);
+			Reflux.utils.inherits(Component1, _super);
 			function Component1(props) {
 				_super.call(this, props);
 				this.state = {};
@@ -237,7 +199,7 @@ describe('Creating ES6 style stores', function()
 		}(Reflux.Component));
 		
 		var MyComponent2 = (function (_super) {
-			__extends(Component2, _super);
+			Reflux.utils.inherits(Component2, _super);
 			function Component2(props) {
 				_super.call(this, props);
 				this.state = {};
@@ -254,4 +216,101 @@ describe('Creating ES6 style stores', function()
 		assert.equal( result, '<div><p>bar</p><p>bar</p></div>' );
 		assert.equal( MyStore.instanceCount, 1 );
 	});
+	
+	it('should mix state in with a Reflux.Component instance via mapStoreToState', function()
+	{
+		var MyStore = (function (_super) {
+			Reflux.utils.inherits(Store, _super);
+			function Store() {
+				_super.call(this);
+				this.state = {foo:'bar'};
+			}
+			return Store;
+		}(Reflux.Store));
+		
+		var MyComponent = (function (_super) {
+			Reflux.utils.inherits(Component, _super);
+			function Component(props) {
+				_super.call(this, props);
+				this.state = {};
+				this.mapStoreToState(MyStore, function(fromStore){
+					return {foobar:fromStore.foo};
+				});
+			}
+			Component.prototype.render = function () {
+				return React.createElement("p", null, this.state.foobar);
+			};
+			return Component;
+		}(Reflux.Component));
+		
+		var result = ReactDOMServer.renderToStaticMarkup( React.createElement(MyComponent, null) );
+		
+		assert.equal( result, '<p>bar</p>' );
+	});
+	
+	it('should mix state separately with two Reflux.Component instances via mapStoreToState', function()
+	{
+		var MyStore = (function (_super) {
+			Reflux.utils.inherits(Store, _super);
+			function Store() {
+				_super.call(this);
+				this.state = {foo:'bar', bar:'foo'};
+			}
+			return Store;
+		}(Reflux.Store));
+		
+		var MyComponent1 = (function (_super) {
+			Reflux.utils.inherits(Component, _super);
+			function Component(props) {
+				_super.call(this, props);
+				this.state = {foo:'?'};
+				this.mapStoreToState(MyStore, function(fromStore){
+					return {bar:fromStore.bar};
+				});
+			}
+			Component.prototype.render = function () {
+				return React.createElement("p", null, this.state.bar+this.state.foo);
+			};
+			return Component;
+		}(Reflux.Component));
+		
+		var MyComponent2 = (function (_super) {
+			Reflux.utils.inherits(Component, _super);
+			function Component(props) {
+				_super.call(this, props);
+				this.state = {bar:'?'};
+				this.mapStoreToState(MyStore, function(fromStore){
+					return {foo:fromStore.foo};
+				});
+			}
+			Component.prototype.render = function () {
+				return React.createElement("p", null, this.state.foo+this.state.bar);
+			};
+			return Component;
+		}(Reflux.Component));
+		
+		var result1 = ReactDOMServer.renderToStaticMarkup( React.createElement(MyComponent1, null) );
+		var result2 = ReactDOMServer.renderToStaticMarkup( React.createElement(MyComponent2, null) );
+		
+		assert.equal( result1, '<p>foo?</p>' );
+		assert.equal( result2, '<p>bar?</p>' );
+	});
+	
+	// this shortcut feature fails in IE9 and IE10, so removing the test for now, until the day that we can drop those 2 browsers
+	/*it('should allow shortcut access to MyStore.singleton.state via MyStore.state', function()
+	{
+		var MyStore = (function (_super) {
+			Reflux.utils.inherits(Store, _super);
+			function Store() {
+				_super.call(this);
+				this.state = {foo:'bar', bar:'foo'};
+			}
+			return Store;
+		}(Reflux.Store));
+		
+		Reflux.initStore(MyStore);
+		
+		assert.equal( MyStore.state.foo, MyStore.singleton.state.foo );
+		assert.equal( MyStore.state.bar, MyStore.singleton.state.bar );
+	});*/
 });

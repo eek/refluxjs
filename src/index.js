@@ -1,5 +1,7 @@
 var Reflux = require('reflux-core');
 
+Reflux.serverMode = typeof window !== 'object';
+
 Reflux.connect = require('./connect');
 
 Reflux.connectFilter = require('./connectFilter');
@@ -10,10 +12,6 @@ Reflux.listenTo = require('./listenTo');
 
 Reflux.listenToMany = require('./listenToMany');
 
-/* globals React: false */
-Reflux.defineReact = require('./defineReact');
-if (typeof React !== 'undefined' && React) {
-	Reflux.defineReact(React, Reflux);
-}
+require('./addES6');
 
 module.exports = Reflux;
